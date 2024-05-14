@@ -7,17 +7,16 @@
 </p>
 
 ## **`Índice`**
-- [  **PROYECTO INDIVIDUAL Nº1**  ](#--proyecto-individual-nº1--)
-- [ **Machine Learning Operations (MLOps)** ](#-machine-learning-operations-mlops-)
-  - [**`Índice`**](#índice)
-  - [**`Introducción`** ](#introducción-)
-  - [**`Contenido del repositorio`** ](#contenido-del-repositorio-)
-  - [**`Información de los datos`** ](#información-de-los-datos-)
-  - [**`Propuesta de trabajo`** ](#propuesta-de-trabajo-)
-  - [**`ETL - EDA`** ](#etl---eda-)
-  - [**`Resultado`** ](#resultado-)
-  - [**`Herramientas`** ](#herramientas-)
-  - [**`Elaborador`** ](#elaborador-)
+
+- [**`Índice`**](#índice)
+- [**`Introducción`** ](#introducción-)
+- [**`Contenido del repositorio`** ](#contenido-del-repositorio-)
+- [**`Información de los datos`** ](#información-de-los-datos-)
+- [**`Propuesta de trabajo`** ](#propuesta-de-trabajo-)
+- [**`ETL - EDA`** ](#etl---eda-)
+- [**`Resultado`** ](#resultado-)
+- [**`Herramientas`** ](#herramientas-)
+- [**`Elaborador`** ](#elaborador-)
 
 
 ## **`Introducción`** <a name="introduccion"></a>
