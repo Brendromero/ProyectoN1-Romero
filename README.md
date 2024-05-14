@@ -7,8 +7,6 @@
 </p>
 
 ## **`Índice`**
-
-- [**`Índice`**](#índice)
 - [**`Introducción`** ](#introducción-)
 - [**`Contenido del repositorio`** ](#contenido-del-repositorio-)
 - [**`Información de los datos`** ](#información-de-los-datos-)
