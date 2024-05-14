@@ -12,33 +12,31 @@ app.description = 'Proyecto Steam Games'
 app.contact = {'name': 'Brendaromero', 'url': 'https://github.com/Brendromero', 'email': 'brendromerok@gmail.com'}
 
 df = pd.read_csv('./new_steam_games.csv')
-df_model = pd.read_csv('modelo_de_prediccion.csv')
+df_model = pd.read_csv('modelo_aprendizaje.csv')
 
     
 # Los endpioints tienen que terminar con algun mensaje de error por si los datos que el usuario registre no este en la base de datos utilizada.
 
 @app.get('/Desarrollador/', tags=['General'])
-def developer(desarrolador: str):
-    """Ingrese un desarrollador para obtener la cantidad de items y porcentaje de contenido Free"""
-    try:
-        if not isinstance(desarrolador, str):
-            raise ValueError({'Error': 'Tipo de dato debe ser un string.'})
-        
-        # Comvierto el nombre de desarrollador a minuscula
-        desarrolador = desarrolador.lower()
-        df['developer'] = df['developer'].str.lower()
-        empresa_desarrolladora = df[df['developer'] == desarrolador]
-        
-        if empresa_desarrolladora.empty:
-            return {'Error': 'No se ha encontrado ningún desarrollador con ese nombre.'}
+def developer(desarrollador: str):
+    """Ingrese un desarrollador para obtener la cantidad de items y porcentaje de contenido Free por cada año"""
+    # Verifica si el tipo de dato de 'desarrollador' es una cadena
+    if not isinstance(desarrollador, str):
+        return {'Error': 'Tipo de dato debe ser un string.'}
 
-        # Se extrae el año desde la columna release_date y se crea una nueva columna llamada 'year'.
+    try:
+        # Suponiendo que 'df' es tu DataFrame que contiene los datos
+        # Se toman las columnas que se usarán del DataFrame
+        dataframe_reducido = df[['developer', 'release_date', 'item_id', 'price']]
+        empresa_desarrolladora = dataframe_reducido[dataframe_reducido['developer'] == desarrollador]
+
+        # Se extrae el año desde la columna release_date y se crea una nueva columna llamada 'year'
         empresa_desarrolladora['year'] = pd.to_datetime(empresa_desarrolladora['release_date']).dt.year
 
-        # Se crea una lista para almacenar los resultados.
+        # Se crea una lista para almacenar los resultados
         result_list = []
 
-        # Se agrupa por año e iteramos por cada grupo para realizar operaciones.
+        # Se agrupa por año e iteramos por cada grupo para realizar operaciones
         for year, group in empresa_desarrolladora.groupby('year'):
             total_items = len(group)
             free_items = len(group[group['price'] == 'Free to Play'])
@@ -48,26 +46,28 @@ def developer(desarrolador: str):
                 'Year': year,
                 'Total_Items': total_items,
                 'Free_Percentage': free_percentage
-                    })
+            })
 
+        # Retorna la lista de resultados si se encontraron resultados, de lo contrario, devuelve un mensaje de error
+        if result_list:
             return result_list
         else:
-            return {'Error': 'No se ha encontrado ningun desarrollador con ese nombre'}
-    except ValueError as e:
-        # Si no es un string devuelve 'Error':
-        return str(e)
+            return {'Error': 'No se ha encontrado ningún desarrollador con ese nombre'}
+    except Exception as e:
+        # Captura cualquier otra excepción y devuelve el mensaje de error
+        return {'Error': str(e)}
 
 
 @app.get('/Datos de Usuario/{id}', tags=['General'])
 def userdata(user_id: str):
     """Ingrese el id de usuario para obtener la cantidad de dinero gastado por el mismo, el porcentaje de recomendación y cantidad de items."""
     try:
+        # Convertir el nombre del desarrollador a minúsculas
+        user_id = user_id.lower()
+        
         if not isinstance(user_id, str):
             raise ValueError({'Error': 'Tipo de dato debe ser un string.'})
         
-        
-        user_id = user_id.lower()
-        df['user_id'] = df['user_id'].str.lower()        
         usuario = df[['item_id', 'user_id', 'items_count', 'price']]
 
         # En df_price1 copiamos los resultados del DataFrame
@@ -140,18 +140,16 @@ df_expanded = df.explode('genres')
 def userforgenre(genero: str):
     """Ingrese el género para obtener el usuario que acumula mas horas de jugadas por dicho género y una lista de acumulación de horas jugadas por año de lanzamiento."""
     try:
-                
+        # Convertir el nombre del desarrollador a minúsculas
         genero = genero.lower()
-        df_expanded['genres'] = df_expanded['genres'].str.lower()
+        
+        if not isinstance(genero, str):
+            raise ValueError({'Error': 'Tipo de dato debe ser un string.'})
         
         # Se toma las columnas de los DataFrame y usamos el dropna para las columnas 'genres y 'pplaytime_forever'
         generos = df_expanded[['item_id', 'user_id', 'release_date', 'playtime_forever', 'genres']]
         generos = generos.dropna(subset=['genres', 'playtime_forever'])
 
-        
-        if not isinstance(genero, str):
-            raise ValueError({'Error': 'Tipo de dato debe ser un string.'})
-        
         # Filtro por el género específico
         generos = generos[generos['genres'] == genero]
 
@@ -192,6 +190,9 @@ def userforgenre(genero: str):
 def best_developer_year(anio: int):
     """Ingrese el año para obtener el top 3 de desarrolladores con juegos más recomendados por usuarios para el año dado."""
     try:
+        # Convertir el nombre del desarrollador a minúsculas
+        anio = anio.lower()
+        
         if not isinstance(anio, int):
             raise ValueError({'Error': 'Tipo de dato debe ser un entero.'})
         
@@ -242,10 +243,8 @@ def get_review_counts(df):
 def developer_reviews_analysis(desarrollador: str):
     """Ingrese el desarrollador para obtener un diccionario con el nombre del mismo y una lista con la cantidad total de registros de reseñas de usuarios."""
     try:
-               
-        # Comvierto el nombre de desarrollador a minuscula
+        # Convertir el nombre del desarrollador a minúsculas
         desarrollador = desarrollador.lower()
-        df['developer'] = df['developer'].str.lower()
         
         # Filtro las reseñas para la desarrolladora proporcionada
         desarrolladora_reviews = df[df['developer'] == desarrollador].copy()
@@ -253,7 +252,7 @@ def developer_reviews_analysis(desarrollador: str):
         # Verifico si el DataFrame filtrado esta vacio
         if desarrolladora_reviews.empty:
             return {'Error': 'No se ha encontrado ningun desarrollador con ese nombre'}
-        
+
         # Utilizo la función get_review_counts para contar las reseñas positivas y negativas
         review_counts = get_review_counts(desarrolladora_reviews)
 
@@ -263,7 +262,7 @@ def developer_reviews_analysis(desarrollador: str):
             'Reseñas Positivas': review_counts['Positive Reviews'],
             'Reseñas Negativas': review_counts['Negative Reviews']
                 }
-
+        # Retornamos el resultado
         return result
     except ValueError as e:
         # Si no es un string devuelve error:
@@ -274,57 +273,58 @@ def developer_reviews_analysis(desarrollador: str):
 def recomendacion_usuario(user_id: str):
     """Ingresa un id de usuario para obtener una lista de 5 juegos recomendados para dicho usuario."""
     try:
-        # Limpio los valores 'nan' en el DataFrame df_model y df_expanded
-        df_model.fillna(0, inplace=True)
-        df_expanded.fillna('', inplace=True)
-        
+        # Convertir user_id a minúsculas
         user_id = user_id.lower()
-        df_model['user_id'] = df_model['user_id'].str.lower()     
         
         if not isinstance(user_id, str):
-            raise ValueError({'Error': 'Tipo de dato debe ser un string.'})
+            raise ValueError('El ID de usuario debe ser un string.')
 
-        # Selecciono las columnas relevantes de df_model
-        recommend = df_model[['item_id', 'user_id', 'item_name']]
-        
-        # Fusiono con df_expanded para obtener los géneros
-        df_ex = df_expanded[['item_id', 'genres']]
-        user_gen = pd.merge(recommend, df_ex, on='item_id', how='left')
-            
-        # Creo una matriz de usuario-elemento
-        user_item_matrix = pd.crosstab(user_gen['user_id'], user_gen['item_id'])
+        # Eliminar espacios en blanco adicionales alrededor del ID de usuario
+        user_id = user_id.strip()
 
-        if user_id not in user_item_matrix.index:
-            return {'Error': 'El usuario especificado no existe en la base de datos.'}
-            
-        # Encuentro el modelo Nearest Neighbors
+        # Filtrar datos del usuario específico
+        user_data = df_model[df_model['user_id'].str.lower() == user_id]
+
+        if user_data.empty:
+            return {'Error': f'No se encontraron registros para el usuario {user_id}.'}
+
+        # Crear un modelo de vecinos más cercanos con Nearest Neighbors
         model = NearestNeighbors(metric='cosine', algorithm='brute')
+
+        # Crear una matriz de usuario-elemento
+        user_item_matrix = pd.crosstab(df_model['user_id'], df_model['item_id'])
+
+        # Ajustar el modelo
         model.fit(user_item_matrix.values)
-    
-        # Obtengo los juegos del usuario
-        user_games = user_item_matrix.loc[user_id, :].values.reshape(1, -1)
-       
-        if user_games.size == 0:  # Compruebo si el array está vacío
-            return {'Error': 'No se encontraron registros para el usuario especificado.'}
-    
-        # Encuentro los juegos recomendados
-        n_neighbors = min(3, len(user_item_matrix))
-        distances, indices = model.kneighbors(user_games, n_neighbors=n_neighbors)
-        nearest_users = indices.flatten()[1:]
-    
-        # Sumo los juegos más similares y ordenarlos
-        recommended_games = user_item_matrix.iloc[nearest_users, :].sum(axis=0).sort_values(ascending=False)
-        top_5_recommendations = recommended_games.index[recommended_games > 0][:5]
-        
-        # Obtengo los nombres de los juegos recomendados y sus géneros
+
+        # Obtener los juegos más similares
+        user_games = user_item_matrix.loc[user_id, :]
+        distances, indices = model.kneighbors(user_games.values.reshape(1, -1), n_neighbors=6) # 6 para incluir al propio usuario
+
+        # Seleccionar los juegos recomendados excluyendo los juegos del propio usuario
+        recommended_games_indices = indices.flatten()[1:] # Excluir al propio usuario
+        recommended_games = user_item_matrix.iloc[recommended_games_indices, :].mean(axis=0).sort_values(ascending=False)
+        top_5_recommendations = recommended_games.index[:5]
+
+        # Obtener los nombres de los juegos recomendados y sus géneros
         games_list = []
         for game_id in top_5_recommendations:
-            game_title = user_gen[user_gen['item_id'] == game_id]['item_name'].values[0]
-            game_genre = user_gen[user_gen['item_id'] == game_id]['genres'].values[0]
-            games_list.append({'Titulo': game_title, 'Genero': game_genre})
-    
-        return games_list
+            game_data = df_model[df_model['item_id'] == game_id]
+            if not game_data.empty:
+                game_title = game_data['item_name'].iloc[0]
+                game_genre = game_data['genres'].iloc[0]
+                
+                # Manejo de valores NaN
+                if pd.isna(game_genre):
+                    game_genre = "No especificado"
+
+                games_list.append({'Titulo': game_title, 'Genero': game_genre})
+
+        # Filtrar valores NaN de la lista de juegos
+        games_list = [game for game in games_list if not any(pd.isna(val) for val in game.values())]
+
+        return games_list[:5]  # Devolver la lista de juegos recomendados
 
     except ValueError as e:
-        # Si no es un string devuelve error:
+        # Si el ID de usuario no es un string, devuelve un mensaje de error
         return {'Error': str(e)}
