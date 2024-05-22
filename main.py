@@ -4,8 +4,15 @@ import numpy as np
 from ast import literal_eval
 import ast
 from sklearn.neighbors import NearestNeighbors
+import os
+import uvicorn
 
 app = FastAPI()
+
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)
 
 app.title = 'Juegos de Stream'
 app.description = 'Proyecto Steam Games'
@@ -14,29 +21,29 @@ app.contact = {'name': 'Brendaromero', 'url': 'https://github.com/Brendromero', 
 df = pd.read_csv('./new_steam_games.csv')
 df_model = pd.read_csv('modelo_aprendizaje.csv')
 
-    
-# Los endpioints tienen que terminar con algun mensaje de error por si los datos que el usuario registre no este en la base de datos utilizada.
 
 @app.get('/Desarrollador/', tags=['General'])
 def developer(desarrollador: str):
     """Ingrese un desarrollador para obtener la cantidad de items y porcentaje de contenido Free por cada año"""
-    # Verifica si el tipo de dato de 'desarrollador' es una cadena
+    # Verifico si el tipo de dato de 'desarrollador' es una cadena
     if not isinstance(desarrollador, str):
         return {'Error': 'Tipo de dato debe ser un string.'}
 
     try:
-        # Suponiendo que 'df' es tu DataFrame que contiene los datos
-        # Se toman las columnas que se usarán del DataFrame
+        # Convierto el nombre del desarrollador a minúsculas
+        desarrollador = desarrollador.lower()
+        
+        # Tomo las columnas que se usarán del dataframe
         dataframe_reducido = df[['developer', 'release_date', 'item_id', 'price']]
         empresa_desarrolladora = dataframe_reducido[dataframe_reducido['developer'] == desarrollador]
 
-        # Se extrae el año desde la columna release_date y se crea una nueva columna llamada 'year'
+        # Extraigo el año desde la columna release_date y se crea una nueva columna llamada 'year'
         empresa_desarrolladora['year'] = pd.to_datetime(empresa_desarrolladora['release_date']).dt.year
 
-        # Se crea una lista para almacenar los resultados
+        # Creo una lista para almacenar los resultados
         result_list = []
 
-        # Se agrupa por año e iteramos por cada grupo para realizar operaciones
+        # Agrupo por año e iteramos por cada grupo para realizar operaciones
         for year, group in empresa_desarrolladora.groupby('year'):
             total_items = len(group)
             free_items = len(group[group['price'] == 'Free to Play'])
@@ -48,13 +55,13 @@ def developer(desarrollador: str):
                 'Free_Percentage': free_percentage
             })
 
-        # Retorna la lista de resultados si se encontraron resultados, de lo contrario, devuelve un mensaje de error
+        # Retorno la lista de resultados si se encontraron resultados, de lo contrario, devuelve un mensaje de error
         if result_list:
             return result_list
         else:
             return {'Error': 'No se ha encontrado ningún desarrollador con ese nombre'}
     except Exception as e:
-        # Captura cualquier otra excepción y devuelve el mensaje de error
+        # Capturo cualquier otra excepción y devuelve el mensaje de error
         return {'Error': str(e)}
 
 
@@ -62,7 +69,7 @@ def developer(desarrollador: str):
 def userdata(user_id: str):
     """Ingrese el id de usuario para obtener la cantidad de dinero gastado por el mismo, el porcentaje de recomendación y cantidad de items."""
     try:
-        # Convertir el nombre del desarrollador a minúsculas
+        # Convierto el nombre del desarrollador a minúsculas
         user_id = user_id.lower()
         
         if not isinstance(user_id, str):
@@ -190,9 +197,6 @@ def userforgenre(genero: str):
 def best_developer_year(anio: int):
     """Ingrese el año para obtener el top 3 de desarrolladores con juegos más recomendados por usuarios para el año dado."""
     try:
-        # Convertir el nombre del desarrollador a minúsculas
-        anio = anio.lower()
-        
         if not isinstance(anio, int):
             raise ValueError({'Error': 'Tipo de dato debe ser un entero.'})
         
@@ -243,7 +247,7 @@ def get_review_counts(df):
 def developer_reviews_analysis(desarrollador: str):
     """Ingrese el desarrollador para obtener un diccionario con el nombre del mismo y una lista con la cantidad total de registros de reseñas de usuarios."""
     try:
-        # Convertir el nombre del desarrollador a minúsculas
+        # Convierto el nombre del desarrollador a minúsculas
         desarrollador = desarrollador.lower()
         
         # Filtro las reseñas para la desarrolladora proporcionada
@@ -273,7 +277,7 @@ def developer_reviews_analysis(desarrollador: str):
 def recomendacion_usuario(user_id: str):
     """Ingresa un id de usuario para obtener una lista de 5 juegos recomendados para dicho usuario."""
     try:
-        # Convertir user_id a minúsculas
+        # Convierto user_id a minúsculas
         user_id = user_id.lower()
         
         if not isinstance(user_id, str):
