@@ -74,7 +74,7 @@ Los datos entregados para trabajar fueron tres y en un formato JSON
 El resultado es una API renderizada con las seis funciones requeridas.
 
 - Acceder al siguiente link: [API](https://proyectosteam-romero.onrender.com/docs)
-> * *IMPORTANTE* : Todos los endpoints estan en funcionamiento, sin embargo a la hora de consultarlo en el render, muestra un error.
+> * *IMPORTANTE* : Todos los endpoints estan en funcionamiento, sin embargo a la hora de consultarlo en el render, muestra un error en el de recomendaciones.
 - Acceder a los CSV: [Datasets](https://drive.google.com/drive/folders/1Y7QCXQIjiI6eD7Gh7VLCbUlMdZ5cjhvi?usp=drive_link)
 
 ## **`Herramientas`** <a name="herramientas"></a>
